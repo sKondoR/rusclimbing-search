@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "ms-python.pylint",
+        "kilocode.kilo-code",
+        "bradlc.vscode-tailwindcss",
+        "infeng.vscode-react-typescript"
+    ]
+}

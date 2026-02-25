@@ -1,0 +1,32 @@
+{
+  "name": "rusclimbing-search",
+  "version": "1.0.0",
+  "description": "API для поиска соревнований по скалолазанию",
+  "main": "api/main.py",
+  "scripts": {
+    "start": "uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload",
+    "build": "echo 'Build complete'",
+    "dev": "uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload",
+    "lint:backend-ruff": "ruff check api",
+    "lint:backend-mypy": "mypy api",
+    "lint:backend-pylint": "pylint --load-plugins=pylint_fastapi_plugin api",
+    "lint": "npm run lint:backend-ruff && npm run lint:backend-mypy && npm run lint:backend-pylint",
+    "format": "prettier --write \"api/**/*.py\"",
+    "format:check": "prettier --check \"api/**/*.py\""
+  },
+  "keywords": [
+    "climbing",
+    "api",
+    "fastapi",
+    "vercel"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "vercel": {
+    "buildCommand": "npm run build",
+    "outputDirectory": ".",
+    "installCommand": "npm install",
+    "framework": "fastapi"
+  }
+}

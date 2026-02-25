@@ -1,0 +1,20 @@
+[MASTER]
+load-plugins=pylint_fastapi_plugin
+
+[MESSAGES CONTROL]
+# Enable FastAPI-specific rules
+enable=fastapi-route-decorator,
+       fastapi-model-conventions,
+       fastapi-dependency-check
+
+# Disable some noisy rules if needed
+disable=missing-module-docstring,
+        missing-function-docstring,
+        missing-class-docstring,
+        too-few-public-methods
+
+[FORMAT]
+max-line-length=88
+
+[REPORTS]
+output-format=colorized

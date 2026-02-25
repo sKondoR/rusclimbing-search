@@ -1,4 +1,4 @@
-/aif-plan I should have a backend on fastapi deployed on vercel with 1 endpoint:
+/aif-architecture I should have a backend on fastapi deployed on vercel with 1 endpoint:
 I will send request with parameters: 
  {
     start,
@@ -15,7 +15,7 @@ groups = 'adults' | 'younger' | 'teenagers' | 'juniors' | 'v10' | 'v13' | 'v15' 
 disciplines = 'bouldering' | 'dvoerobye' | 'etalon' | 'skorost' | 'trudnost' | 'sv' | 'mnogobore'
 
 fastapi should send GET request to:
-https://rusclimbing.ru/competitions/?year=&start=2000-01-24&end=2026-12-31&ranks%5B%5D=%D0%92%D1%81%D0%B5%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B9%D1%81%D0%BA%D0%B8%D0%B5&ranks%5B%5D=%D0%9C%D0%B5%D0%B6%D0%B4%D1%83%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D0%BD%D1%8B%D0%B5&ranks%5B%5D=%D0%A0%D0%B5%D0%B3%D0%B8%D0%BE%D0%BD%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B5&types%5B%5D=book_competition&types%5B%5D=book_festival&types%5B%5D=book_learning&types%5B%5D=book_train&groups%5B%5D=adults&groups%5B%5D=juniors&groups%5B%5D=older&groups%5B%5D=teenagers&groups%5B%5D=younger&groups%5B%5D=v13&groups%5B%5D=v15&groups%5B%5D=v17&groups%5B%5D=v19&groups%5B%5D=v10&disciplines%5B%5D=bouldering&disciplines%5B%5D=dvoerobye&disciplines%5B%5D=etalon&disciplines%5B%5D=skorost&disciplines%5B%5D=trudnost&disciplines%5B%5D=sv&disciplines%5B%5D=mnogobore
+https://rusclimbing.ru/competitions/?year=&start=2000-01-24&end=2026-12-31&ranks%5B%5D=%D0%92%D1%81%D0%B5%D1%80%D0%BE%D1%81%D1%81%D0%B8%D0%B9%D1%81%D0%BA%D0%B8%D0%B5&ranks%5B%5D=%D0%9C%D0%B5%D0%B6%D0%B4%D1%83%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D0%BD%D1%8B%D0%B5&ranks%5B%5D=%D0%A0%D0%B5%D0%B3%D0%B8%D0%BE%D0%BD%D0%B0%D0%BB%D1%8C%D0%BD%D1%8B%D0%B5&types%5B%5D=book_competition&types%5B%5D=book_festival&types%5B%5D=book_learning&types%5B%5D=book_train&groups%5B%5D=adults&groups%5B%5D=juniors&groups%5B%5D=older&groups%5B%5D=teenagers&groups%5B%5D=younger&groups%5B%5D=v13&groups%5B%5D=v15&groups%5B%5D=v17&groups%5B%5D=v19&groups%5B%5D=v10&disciplines%5B%5D=bouldering&disciplines%5B%5D=dvoerobye&disciplines%5B%5D=etalon&disciplines%5B%5D=skorost&disciplines%5B%5D=trudnost&disciplines%5B%5D=sv&disciplines%ac5B%5D=mnogobore
 
 and parse html
 row will have structure:
