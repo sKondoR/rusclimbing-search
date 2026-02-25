@@ -3,15 +3,18 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.future import select
-from sqlalchemy import text
+from sqlalchemy import text, Column, Integer, String, Text, DateTime, ARRAY
+from sqlalchemy.ext.declarative import declarative_base
 from typing import List, Optional
 from datetime import datetime
+from api.parser import parse_competitions
 import requests
 from bs4 import BeautifulSoup
 import re
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 import os
+
 
 load_dotenv()
 
@@ -28,6 +31,10 @@ app.add_middleware(
 @app.get("/")
 async def root():
     return {"message": "Welcome to RusClimbing API", "version": "1.0.0"}
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
 
 
 # Database configuration
@@ -57,6 +64,23 @@ engine = create_async_engine(DATABASE_URL, echo=True)
 AsyncSessionLocal = sessionmaker(
     bind=engine, class_=AsyncSession, expire_on_commit=False
 )
+
+# Define the Competition model here to make it globally accessible
+Base = declarative_base()
+
+class Competition(Base):
+    __tablename__ = "competitions"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    date = Column(String)
+    link = Column(String, unique=True, index=True)
+    name = Column(String)
+    location = Column(String)
+    type = Column(String)
+    groups = Column(ARRAY(String))
+    disciplines = Column(ARRAY(String))
+    created_at = Column(DateTime, server_default=text('now()'))
+    updated_at = Column(DateTime, server_default=text('now()'), onupdate=text('now()'))
 
 class CompetitionBase(BaseModel):
     date: str
@@ -91,7 +115,6 @@ async def fetch_competitions_from_source(start: str, end: str, ranks: List[str],
     base_url = "https://rusclimbing.ru/competitions/"
     
     params = {
-        "year": "",
         "start": start,
         "end": end,
     }
@@ -106,79 +129,16 @@ async def fetch_competitions_from_source(start: str, end: str, ranks: List[str],
     params.update(format_param("disciplines", disciplines))
     
     try:
-        response = requests.get(base_url, params=params)
+        response = requests.get(base_url, params=params, timeout=10)
         response.raise_for_status()
-        
         soup = BeautifulSoup(response.content, 'html.parser')
-        competitions = []
-        
-        for link in soup.find_all('a', class_='table__content calendar__link'):
-            try:
-                # Extract date
-                date_span = link.find('p', class_='table__text calendar__date')
-                if date_span:
-                    date_text = date_span.get_text(strip=True)
-                    date_match = re.search(r'\d{1,2}\s*\-\s*\d{1,2}\s+\w+', date_text)
-                    if date_match:
-                        date = date_match.group()
-                    else:
-                        date = date_text
-                else:
-                    date = ""
-                
-                # Extract link
-                href = link.get('href', '')
-                
-                # Extract name
-                name_span = link.find('p', class_='table__text calendar__name')
-                name = name_span.get_text(strip=True) if name_span else ""
-                
-                # Extract location
-                location_span = link.find('p', class_='table__text calendar__location')
-                location = location_span.get_text(strip=True) if location_span else ""
-                
-                # Extract type
-                type_span = link.find('p', class_='table__text calendar__type')
-                type_text = type_span.get_text(strip=True) if type_span else ""
-                type_match = re.search(r'[А-Яа-я]', type_text)
-                type_ = type_match.group() if type_match else ""
-                
-                # Extract groups
-                groups_span = link.find('p', class_='table__text calendar__group')
-                groups = []
-                if groups_span:
-                    groups_text = groups_span.get_text(strip=True)
-                    groups = [g.strip() for g in re.findall(r'[А-Яа-я]', groups_text)]
-                
-                # Extract disciplines
-                disciplines_span = link.find('p', class_='table__text calendar__disciplines')
-                disciplines = []
-                if disciplines_span:
-                    disciplines_text = disciplines_span.get_text(strip=True)
-                    disciplines = [d.strip() for d in re.findall(r'[А-Яа-я]', disciplines_text)]
-                
-                # Extract year from link
-                year_match = re.search(r'\d{4}', href)
-                if year_match:
-                    year = year_match.group()
-                    date = f"{date} {year}"
-                
-                competitions.append({
-                    "date": date,
-                    "link": href,
-                    "name": name,
-                    "location": location,
-                    "type": type_,
-                    "groups": groups,
-                    "disciplines": disciplines
-                })
-                
-            except Exception as e:
-                print(f"Error parsing competition: {e}")
-                continue
+        competitions = parse_competitions(soup)
         
         return competitions
         
+    except requests.exceptions.RequestException as e:
+        print(f"Network error fetching competitions: {e}")
+        return []
     except Exception as e:
         print(f"Error fetching competitions: {e}")
         return []
@@ -202,28 +162,6 @@ async def startup_event():
             )
         """))
         await conn.commit()
-
-def create_tables():
-    from sqlalchemy import Column, Integer, String, Text, DateTime, ARRAY
-    from sqlalchemy.ext.declarative import declarative_base
-    
-    Base = declarative_base()
-    
-    class Competition(Base):
-        __tablename__ = "competitions"
-        
-        id = Column(Integer, primary_key=True, index=True)
-        date = Column(String)
-        link = Column(String, unique=True, index=True)
-        name = Column(String)
-        location = Column(String)
-        type = Column(String)
-        groups = Column(ARRAY(String))
-        disciplines = Column(ARRAY(String))
-        created_at = Column(DateTime, server_default=text('now()'))
-        updated_at = Column(DateTime, server_default=text('now()'), onupdate=text('now()'))
-    
-    Base.metadata.create_all(engine)
 
 @app.get("/api/competitions", response_model=List[CompetitionResponse])
 async def get_competitions(
@@ -256,27 +194,66 @@ async def fetch_and_save_competitions(
     filter: CompetitionFilter = Depends(),
     db: AsyncSession = Depends(get_db)
 ):
-    competitions = await fetch_competitions_from_source(
-        filter.start or "2000-01-01",
-        filter.end or "2100-12-31",
-        filter.ranks or ["Всероссийские", "Международные", "Региональные"],
-        filter.types or ["book_competition", "book_festival"],
-        filter.groups or ["adults", "juniors", "teenagers", "younger", "v10", "v13", "v15", "v19"],
-        filter.disciplines or ["bouldering", "dvoerobye", "etalon", "skorost", "trudnost", "sv", "mnogobore"]
-    )
-    
-    for comp in competitions:
-        competition = Competition(
-            date=comp["date"],
-            link=comp["link"],
-            name=comp["name"],
-            location=comp["location"],
-            type=comp["type"],
-            groups=comp["groups"],
-            disciplines=comp["disciplines"]
+    try:
+        competitions = await fetch_competitions_from_source(
+            filter.start or "2000-01-01",
+            filter.end or "2100-12-31",
+            filter.ranks or ["Всероссийские", "Международные", "Региональные"],
+            filter.types or ["book_competition", "book_festival"],
+            filter.groups or ["adults", "juniors", "teenagers", "younger", "v10", "v13", "v15", "v19"],
+            filter.disciplines or ["bouldering", "dvoerobye", "etalon", "skorost", "trudnost", "sv", "mnogobore"]
         )
-        db.add(competition)
-    
-    await db.commit()
-    
-    return await get_competitions(filter, db)
+        
+        # Log how many competitions were found
+        print(f"Found {len(competitions)} competitions to save")
+        
+        # Check for duplicates and only insert new records
+        # Get existing links for the current batch
+        existing_links = set()
+        batch_links = [comp["link"] for comp in competitions]
+        
+        # Check which links already exist in DB
+        try:
+            result = await db.execute(select(Competition.link).where(Competition.link.in_(batch_links)))
+            existing_links = set(link[0] for link in result.fetchall())
+        except Exception as e:
+            print(f"Error checking existing links: {e}")
+            # If we can't check existing links, proceed with all competitions
+            existing_links = set()
+        
+        # Filter out duplicates and insert only new records
+        new_competitions = [comp for comp in competitions if comp["link"] not in existing_links]
+        
+        print(f"Found {len(competitions)} competitions, {len(new_competitions)} are new")
+        print(f"Existing links: {len(existing_links)}")
+  
+        inserted_count = 0
+        for comp in new_competitions:
+            try:
+                competition = Competition(
+                    date=comp["date"],
+                    link=comp["link"],
+                    name=comp["name"],
+                    location=comp["location"],
+                    type=comp["type"],
+                    groups=comp["groups"],
+                    disciplines=comp["disciplines"]
+                )
+                db.add(competition)
+                inserted_count += 1
+            except Exception as e:
+                print(f"Error inserting competition with link {comp['link']}: {e}")
+                continue
+        
+        print(f"Successfully inserted {inserted_count} competitions")
+        await db.commit()
+        
+        return await get_competitions(filter, db)
+    except Exception as e:
+        print(f"Error in fetch_and_save_competitions: {e}")
+        # Log the full traceback for debugging
+        import traceback
+        traceback.print_exc()
+        # Rollback in case of error
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")

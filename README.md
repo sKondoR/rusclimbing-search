@@ -163,5 +163,5 @@ rusclimbing-search/
 
 
 
-
+taskkill /F /IM python.exe
 http://localhost:8000
