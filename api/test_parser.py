@@ -64,7 +64,7 @@ class TestParseCompetitions(unittest.TestCase):
         competition2 = result[1]
         self.assertEqual(competition2["date"], "31 марта - 05 апреля 2024")
         self.assertEqual(competition2["link"], "/competitions/2403msk_vs1/")
-        self.assertEqual(competition2["name"], "Всероссийские соревнования<")
+        self.assertEqual(competition2["name"], "Всероссийские соревнования")
         self.assertEqual(competition2["location"], "Москва")
         self.assertEqual(competition2["type"], "С")
         self.assertEqual(competition2["groups"], ["Ю","С"])
