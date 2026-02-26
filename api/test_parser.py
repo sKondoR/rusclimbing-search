@@ -8,7 +8,7 @@ class TestParseevents(unittest.TestCase):
         # Mock HTML content
         html_content = '''
         <li class="table__item" data-accordion="element">
-            <a class="table__content calendar__link" data-accordion="content" href="/events/2103voronezh_ch/">
+            <a class="table__content calendar__link" data-accordion="content" href="/competitions/2103voronezh_ch/">
                 <p class="table__text calendar__date"><span>Даты проведения</span>04 - 07 марта</p>
                 <p class="table__text calendar__name"><span>Название мероприятия</span>Чемпионат России</p>
                 <p class="calendar__button calendar__button--up" data-accordion="button">Развернуть</p>
@@ -26,7 +26,7 @@ class TestParseevents(unittest.TestCase):
             </a>
         </li>
         <li class="table__item" data-accordion="element">
-            <a class="table__content calendar__link" data-accordion="content" href="/events/2403msk_vs1/">
+            <a class="table__content calendar__link" data-accordion="content" href="/competitions/2403msk_vs1/">
                 <p class="table__text calendar__date"><span>Даты проведения</span>31 марта - 05 апреля</p>
                 <p class="table__text calendar__name"><span>Название мероприятия</span>Всероссийские соревнования</p>
                 <p class="calendar__button calendar__button--up" data-accordion="button">Развернуть</p>
@@ -54,7 +54,7 @@ class TestParseevents(unittest.TestCase):
         
         event = result[0]
         self.assertEqual(event["date"], "04 - 07 марта 2021")
-        self.assertEqual(event["link"], "/events/2103voronezh_ch/")
+        self.assertEqual(event["link"], "/competitions/2103voronezh_ch/")
         self.assertEqual(event["name"], "Чемпионат России")
         self.assertEqual(event["location"], "Воронеж")
         self.assertEqual(event["type"], "С")
@@ -63,7 +63,7 @@ class TestParseevents(unittest.TestCase):
 
         event2 = result[1]
         self.assertEqual(event2["date"], "31 марта - 05 апреля 2024")
-        self.assertEqual(event2["link"], "/events/2403msk_vs1/")
+        self.assertEqual(event2["link"], "/competitions/2403msk_vs1/")
         self.assertEqual(event2["name"], "Всероссийские соревнования")
         self.assertEqual(event2["location"], "Москва")
         self.assertEqual(event2["type"], "С")
