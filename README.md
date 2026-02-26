@@ -1,59 +1,42 @@
-# RusClimbing Search API
+# rusclimbing-search
 
-API для поиска соревнований по скалолазанию на основе данных с rusclimbing.ru
+Сервис поиска результатов соревнований по скалолазанию в России.
 
-## Особенности
+## Описание
 
-- **FastAPI** - современный веб-фреймворк
-- **PostgreSQL** - надежная база данных
-- **Vercel** - деплой и хостинг
-- **BeautifulSoup** - парсер HTML
-- **CORS** - кросс-доменные запросы
+Этот проект представляет собой API для поиска и получения результатов соревнований по скалолазанию, проводимых в России. Данные собираются с официальных сайтов и структурируются для удобного доступа через REST-интерфейс.
+
+## Структура проекта
+
+- `api/` — основной код приложения FastAPI
+  - `main.py` — точка входа и настройка приложения
+  - `db.py` — работа с базой данных
+  - `models.py` — модели данных
+  - `parser.py` — парсер результатов соревнований
+  - `v1/` — маршруты API версии 1
+- `core/` — конфигурация приложения
+- `schemas/` — Pydantic-схемы для валидации данных
+- `services/` — бизнес-логика и сервисы
+
+## Зависимости
+
+- Python 3.9+
+- FastAPI
+- SQLAlchemy
+- BeautifulSoup
 
 ## Установка
 
-1. Клонируйте репозиторий:
-```bash
-git clone <repository-url>
-cd rusclimbing-search
-```
-
-2. Установите зависимости:
 ```bash
 pip install .
 ```
 
-3. Создайте файл `.env`:
-```bash
-cp .env.example .env
-```
-
-4. Настройте переменные окружения в `.env`:
-```env
-DATABASE_URL="postgresql://username:password@hostname:5432/database_name"
-VERCEL_URL="https://your-app-name.vercel.app"
-ALLOWED_ORIGINS=["https://rusclimbing-search.vercel.app", "http://localhost:3000"]
-```
-
 ## Запуск
 
-### Локальный запуск
 ```bash
-# Разработка
-python -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
-
-# Продакшн
-python -m uvicorn api.main:app --host 0.0.0.0 --port 8000
+uvicorn api.main:app --reload
 ```
 
-### Vercel
-```bash
-# Установка Vercel CLI
-npm i -g vercel
-
-# Деплой
-vercel --prod
-```
 
 ## API Эндпоинты
 
@@ -121,20 +104,6 @@ curl -X GET "http://localhost:8000/api/events/fetch?start=2024-01-01&end=2024-12
 - `sv` - спортивное восхождение
 - `mnogobore` - многоборье
 
-## Структура проекта
-
-```
-rusclimbing-search/
-├── api/
-│   └── main.py          # Основное приложение FastAPI
-├── .env                  # Переменные окружения
-├── .env.example          # Пример файла окружения
-├── requirements.txt       # Зависимости Python
-├── package.json          # Зависимости Node.js и конфигурация Vercel
-├── README.md             # Документация
-└── .gitignore            # Игнорируемые файлы
-```
-
 ## Деплой на Vercel
 
 1. Создайте аккаунт на [Vercel](https://vercel.com/)
@@ -150,18 +119,3 @@ rusclimbing-search/
    ```bash
    vercel --prod
    ```
-
-## База данных
-
-Для работы с PostgreSQL:
-1. Создайте базу данных
-2. Настройте подключение в `.env`
-3. При первом запуске таблицы создадутся автоматически
-
-
-
-
-
-
-taskkill /F /IM python.exe
-http://localhost:8000
