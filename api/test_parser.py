@@ -1,14 +1,14 @@
 import unittest
 from bs4 import BeautifulSoup
-from parser import parse_competitions
+from parser import parse_events
 
-class TestParseCompetitions(unittest.TestCase):
+class TestParseevents(unittest.TestCase):
     
-    def test_parse_competitions(self):
+    def test_parse_events(self):
         # Mock HTML content
         html_content = '''
         <li class="table__item" data-accordion="element">
-            <a class="table__content calendar__link" data-accordion="content" href="/competitions/2103voronezh_ch/">
+            <a class="table__content calendar__link" data-accordion="content" href="/events/2103voronezh_ch/">
                 <p class="table__text calendar__date"><span>Даты проведения</span>04 - 07 марта</p>
                 <p class="table__text calendar__name"><span>Название мероприятия</span>Чемпионат России</p>
                 <p class="calendar__button calendar__button--up" data-accordion="button">Развернуть</p>
@@ -26,7 +26,7 @@ class TestParseCompetitions(unittest.TestCase):
             </a>
         </li>
         <li class="table__item" data-accordion="element">
-            <a class="table__content calendar__link" data-accordion="content" href="/competitions/2403msk_vs1/">
+            <a class="table__content calendar__link" data-accordion="content" href="/events/2403msk_vs1/">
                 <p class="table__text calendar__date"><span>Даты проведения</span>31 марта - 05 апреля</p>
                 <p class="table__text calendar__name"><span>Название мероприятия</span>Всероссийские соревнования</p>
                 <p class="calendar__button calendar__button--up" data-accordion="button">Развернуть</p>
@@ -47,28 +47,28 @@ class TestParseCompetitions(unittest.TestCase):
         soup = BeautifulSoup(html_content, 'html.parser')
         
         # Call the function
-        result = parse_competitions(soup)
+        result = parse_events(soup)
         
         # Assert the result
         self.assertEqual(len(result), 2)
         
-        competition = result[0]
-        self.assertEqual(competition["date"], "04 - 07 марта 2021")
-        self.assertEqual(competition["link"], "/competitions/2103voronezh_ch/")
-        self.assertEqual(competition["name"], "Чемпионат России")
-        self.assertEqual(competition["location"], "Воронеж")
-        self.assertEqual(competition["type"], "С")
-        self.assertEqual(competition["groups"], ["В"])
-        self.assertEqual(competition["disciplines"], ["Б"])
+        event = result[0]
+        self.assertEqual(event["date"], "04 - 07 марта 2021")
+        self.assertEqual(event["link"], "/events/2103voronezh_ch/")
+        self.assertEqual(event["name"], "Чемпионат России")
+        self.assertEqual(event["location"], "Воронеж")
+        self.assertEqual(event["type"], "С")
+        self.assertEqual(event["groups"], ["В"])
+        self.assertEqual(event["disciplines"], ["Б"])
 
-        competition2 = result[1]
-        self.assertEqual(competition2["date"], "31 марта - 05 апреля 2024")
-        self.assertEqual(competition2["link"], "/competitions/2403msk_vs1/")
-        self.assertEqual(competition2["name"], "Всероссийские соревнования")
-        self.assertEqual(competition2["location"], "Москва")
-        self.assertEqual(competition2["type"], "С")
-        self.assertEqual(competition2["groups"], ["Ю","С"])
-        self.assertEqual(competition2["disciplines"], ["Т","Эт"])
+        event2 = result[1]
+        self.assertEqual(event2["date"], "31 марта - 05 апреля 2024")
+        self.assertEqual(event2["link"], "/events/2403msk_vs1/")
+        self.assertEqual(event2["name"], "Всероссийские соревнования")
+        self.assertEqual(event2["location"], "Москва")
+        self.assertEqual(event2["type"], "С")
+        self.assertEqual(event2["groups"], ["Ю","С"])
+        self.assertEqual(event2["disciplines"], ["Т","Эт"])
 
 if __name__ == '__main__':
     unittest.main()

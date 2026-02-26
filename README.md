@@ -57,7 +57,7 @@ vercel --prod
 
 ## API Эндпоинты
 
-### GET /api/competitions
+### GET /api/events
 Получение списка соревнований с фильтрацией
 
 **Параметры запроса:**
@@ -70,10 +70,10 @@ vercel --prod
 
 **Пример запроса:**
 ```bash
-curl -X GET "http://localhost:8000/api/competitions?start=2024-01-01&end=2024-12-31&types=book_competition&groups=adults"
+curl -X GET "http://localhost:8000/api/events?start=2024-01-01&end=2024-12-31&types=book_competition&groups=adults"
 ```
 
-### GET /api/competitions/fetch
+### GET /api/events/fetch
 Загрузка и сохранение соревнований из источника
 
 **Параметры запроса:**
@@ -86,7 +86,7 @@ curl -X GET "http://localhost:8000/api/competitions?start=2024-01-01&end=2024-12
 
 **Пример запроса:**
 ```bash
-curl -X GET "http://localhost:8000/api/competitions/fetch?start=2024-01-01&end=2024-12-31"
+curl -X GET "http://localhost:8000/api/events/fetch?start=2024-01-01&end=2024-12-31"
 ```
 
 ## Параметры фильтрации

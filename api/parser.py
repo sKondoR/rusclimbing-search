@@ -1,7 +1,7 @@
 import re
 
-def parse_competitions(soup):
-    competitions = []
+def parse_events(soup):
+    events = []
     
     for link in soup.find_all('a', class_='table__content calendar__link'):
         try:
@@ -58,7 +58,7 @@ def parse_competitions(soup):
                     date = f"{date} {year}"
             print(f"date:  {date}")
             
-            competitions.append({
+            events.append({
                 "date": date,
                 "link": href,
                 "name": name,
@@ -69,7 +69,7 @@ def parse_competitions(soup):
             })
             
         except Exception as e:
-            print(f"Error parsing competition: {e}")
+            print(f"Error parsing event: {e}")
             continue
 
-    return competitions
+    return events
