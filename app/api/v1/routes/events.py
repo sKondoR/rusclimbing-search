@@ -11,7 +11,7 @@ from app.api.db import get_db
 from app.api.models import Event
 from app.api.parser import parse_events
 from app.core.config import settings
-from app.core.permissions import permission_checker
+# from app.core.permissions import PermissionCheck
 from app.schemas.event import BaseResponse, EventFilter, EventResponse
 
 router = APIRouter(prefix="/api", tags=["events"])
@@ -26,7 +26,7 @@ router = APIRouter(prefix="/api", tags=["events"])
         "Get events from database with optional filtering. "
         "Supports filtering by date range, types, groups, and disciplines."
     ),
-    dependencies=[], # Depends(permission_checker())
+    dependencies=[], # Depends(PermissionCheck())
 )
 async def get_events(
     filter_: EventFilter = Depends(), db: AsyncSession = Depends(get_db)
@@ -147,7 +147,8 @@ async def fetch_and_save_events(
         # Filter out duplicates and insert only new records
         new_events = [comp for comp in events if comp["link"] not in existing_links]
 
-        print(f"Found {len(events)} events, {len(new_events)} are new")
+        message = f"Found {len(events)} events, {len(new_events)} are new"
+        print(message)
         print(f"Existing links: {len(existing_links)}")
 
         inserted_count = 0
@@ -170,9 +171,9 @@ async def fetch_and_save_events(
 
         print(f"Successfully inserted {inserted_count} events")
         await db.commit()
-
+        # await get_events(filter_, db)
         # Return the updated events list
-        return await get_events(filter_, db)
+        return BaseResponse(data=new_events, success=True, message=message )
     except Exception as e:
         print(f"Error in fetch_and_save_events: {e}")
         traceback.print_exc()

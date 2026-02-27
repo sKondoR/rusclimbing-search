@@ -2,7 +2,7 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.core.permissions import permission_checker
+from app.core.permissions import PermissionCheck
 from app.api.db import startup_event
 from app.api.v1.routes.events import router
 from app.schemas.event import BaseResponse
@@ -36,7 +36,7 @@ app.include_router(router)
     summary="Root endpoint",
     operation_id="root",
     description="Root endpoint for the API. Returns a welcome message with API version.",
-    dependencies=[Depends(permission_checker())],
+    dependencies=[Depends(PermissionCheck())],
 )
 async def root() -> dict:
     """
@@ -54,7 +54,7 @@ async def root() -> dict:
     summary="Health check",
     operation_id="health_check",
     description="Health check endpoint. Returns API health status.",
-    dependencies=[Depends(permission_checker())],
+    dependencies=[Depends(PermissionCheck())],
 )
 async def health_check() -> dict:
     """

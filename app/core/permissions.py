@@ -1,5 +1,3 @@
-from typing import Callable
-
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
@@ -56,4 +54,4 @@ class PermissionChecker:
         return True
 
 
-permission_checker = PermissionChecker
+PermissionCheck = PermissionChecker
