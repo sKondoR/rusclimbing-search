@@ -1,13 +1,21 @@
-from core.config import settings
-from fastapi import FastAPI, HTTPException, Depends
+from app.core.config import settings
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.db import startup_event
-from api.v1.routes.events import router
+from app.api.db import startup_event
+from app.api.v1.routes.events import router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
+    docs_url="/docs",
+    
+    openapi_tags=[
+        {
+            "name": "events",
+            "description": "запрос всех событий",
+        },
+    ],
 )
 
 app.add_middleware(

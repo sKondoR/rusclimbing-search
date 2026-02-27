@@ -1,14 +1,16 @@
-from core.config import settings
+from app.core.config import settings
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from typing import List, Optional
+from typing import List
 import requests
 
-from schemas.event import EventResponse, EventFilter
-from api.db import get_db
-from api.models import Event
+from app.schemas.event import EventResponse, EventFilter
+from app.api.db import get_db
+from app.api.models import Event
+from app.api.parser import parse_events
+from bs4 import BeautifulSoup
 
 router = APIRouter(prefix="/api", tags=["events"])
 
