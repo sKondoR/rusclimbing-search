@@ -1,6 +1,8 @@
-from pydantic import BaseModel
-from typing import List
 from datetime import datetime
+from typing import List
+
+from pydantic import BaseModel
+
 
 class EventBase(BaseModel):
     date: str
@@ -11,13 +13,16 @@ class EventBase(BaseModel):
     groups: List[str]
     disciplines: List[str]
 
+
 class EventCreate(EventBase):
     pass
+
 
 class EventResponse(EventBase):
     id: int
     created_at: datetime
     updated_at: datetime
+
 
 class EventFilter(BaseModel):
     start: str | None = None

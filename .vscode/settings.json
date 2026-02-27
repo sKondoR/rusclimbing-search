@@ -1,3 +1,8 @@
 {
-    "python.defaultInterpreterPath": "C:\\Users\\kondr\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"
+    "python.defaultInterpreterPath": "C:\\Users\\kondr\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+    "ruff.enable": true,
+    "ruff.lint.enable": true,
+    "python.locator": "none",
+    "python.analysis.autoImportCompletions": false,
+    "python.analysis.typeCheckingMode": "basic"
 }

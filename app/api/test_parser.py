@@ -1,12 +1,25 @@
 import unittest
 from bs4 import BeautifulSoup
-from parser import parse_events
+from app.api.parser import parse_events
 
-class TestParseevents(unittest.TestCase):
-    
+
+class TestParseEvents(unittest.TestCase):
+    """
+    Unit tests for parse_events function.
+
+    Tests parsing of HTML content containing climbing competition events.
+    """
+
     def test_parse_events(self):
+        """
+        Test parsing of competition events from HTML.
+
+        Verifies that the parse_events function correctly extracts
+        event information including date, link, name, location, type,
+        groups, and disciplines from HTML content.
+        """
         # Mock HTML content
-        html_content = '''
+        html_content = """
         <li class="table__item" data-accordion="element">
             <a class="table__content calendar__link" data-accordion="content" href="/competitions/2103voronezh_ch/">
                 <p class="table__text calendar__date"><span>Даты проведения</span>04 - 07 марта</p>
@@ -15,11 +28,11 @@ class TestParseevents(unittest.TestCase):
                 <p class="table__text calendar__type"><span>Тип</span>С</p>
                 <p class="table__text calendar__group">
                     <span>Группы</span>
-                    В                            
+                    В
                 </p>
                 <p class="table__text calendar__disciplines">
                     <span>Дисциплины</span>
-                    Б                            
+                    Б
                 </p>
                 <p class="table__text calendar__location"><span>Локация</span>Воронеж</p>
                 <p class="calendar__button" data-accordion="button">Свернуть</p>
@@ -41,17 +54,17 @@ class TestParseevents(unittest.TestCase):
                 <p class="calendar__button" data-accordion="button">Свернуть</p>
             </a>
         </li>
-        '''
-        
+        """
+
         # Create BeautifulSoup object
-        soup = BeautifulSoup(html_content, 'html.parser')
-        
+        soup = BeautifulSoup(html_content, "html.parser")
+
         # Call the function
         result = parse_events(soup)
-        
+
         # Assert the result
         self.assertEqual(len(result), 2)
-        
+
         event = result[0]
         self.assertEqual(event["date"], "04 - 07 марта 2021")
         self.assertEqual(event["link"], "/competitions/2103voronezh_ch/")
@@ -67,8 +80,8 @@ class TestParseevents(unittest.TestCase):
         self.assertEqual(event2["name"], "Всероссийские соревнования")
         self.assertEqual(event2["location"], "Москва")
         self.assertEqual(event2["type"], "С")
-        self.assertEqual(event2["groups"], ["Ю","С"])
-        self.assertEqual(event2["disciplines"], ["Т","Эт"])
+        self.assertEqual(event2["groups"], ["Ю", "С"])
+        self.assertEqual(event2["disciplines"], ["Т", "Эт"])
 
-if __name__ == '__main__':
-    unittest.main()
+    if __name__ == "__main__":
+        unittest.main()
