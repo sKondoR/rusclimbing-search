@@ -1,9 +1,11 @@
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+from app.core.permissions import permission_checker
 from app.api.db import startup_event
 from app.api.v1.routes.events import router
+from app.schemas.event import BaseResponse
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -28,7 +30,14 @@ app.add_middleware(
 app.include_router(router)
 
 
-@app.get("/", response_model=dict)
+@app.get(
+    "/",
+    response_model=BaseResponse,
+    summary="Root endpoint",
+    operation_id="root",
+    description="Root endpoint for the API. Returns a welcome message with API version.",
+    dependencies=[Depends(permission_checker())],
+)
 async def root() -> dict:
     """
     Root endpoint for the API.
@@ -39,7 +48,14 @@ async def root() -> dict:
     return {"message": "Welcome to RusClimbing API", "version": "1.0.0"}
 
 
-@app.get("/health", response_model=dict)
+@app.get(
+    "/health",
+    response_model=BaseResponse,
+    summary="Health check",
+    operation_id="health_check",
+    description="Health check endpoint. Returns API health status.",
+    dependencies=[Depends(permission_checker())],
+)
 async def health_check() -> dict:
     """
     Health check endpoint.

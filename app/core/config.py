@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "rusclimbing-search"
     VERSION: str = "1.0.0"
     DATABASE_URL: str = None
-    BASE_URL: str = "https://www.rusclimbing.ru/calendar/"
+    BASE_URL: str = "https://www.rusclimbing.ru/competitions/"
     ORIGINS: list = ["*"]
 
 

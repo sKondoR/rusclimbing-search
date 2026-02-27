@@ -11,15 +11,26 @@ from app.api.db import get_db
 from app.api.models import Event
 from app.api.parser import parse_events
 from app.core.config import settings
-from app.schemas.event import EventFilter, EventResponse
+from app.core.permissions import permission_checker
+from app.schemas.event import BaseResponse, EventFilter, EventResponse
 
 router = APIRouter(prefix="/api", tags=["events"])
 
 
-@router.get("/events", response_model=List[EventResponse])
+@router.get(
+    "/events",
+    response_model=BaseResponse[List[EventResponse]],
+    summary="Get events",
+    operation_id="get_events",
+    description=(
+        "Get events from database with optional filtering. "
+        "Supports filtering by date range, types, groups, and disciplines."
+    ),
+    dependencies=[], # Depends(permission_checker())
+)
 async def get_events(
     filter_: EventFilter = Depends(), db: AsyncSession = Depends(get_db)
-) -> List[Event]:
+) -> BaseResponse[List[EventResponse]]:
     """
     Get events from database with optional filtering.
 
@@ -28,7 +39,7 @@ async def get_events(
         db: Async database session
 
     Returns:
-        List of Event objects matching the filter criteria
+        List of EventResponse objects matching the filter criteria
     """
     query = select(Event)
 
@@ -49,13 +60,26 @@ async def get_events(
     result = await db.execute(query)
     events = result.scalars().all()
 
-    return events
+    # Convert Event objects to EventResponse
+    event_responses = [EventResponse.model_validate(event.__dict__) for event in events]
+    return BaseResponse(data=event_responses, success=True)
 
 
-@router.get("/events/fetch", response_model=List[EventResponse])
+@router.get(
+    "/events/fetch",
+    response_model=BaseResponse,
+    summary="Fetch and save events",
+    operation_id="fetch_and_save_events",
+    description=(
+        "Fetch events from external source and save them to database. "
+        "Fetches events from the climbing competition source with specified "
+        "filters, checks for duplicates, and inserts new events into the database."
+    ),
+    dependencies=[],
+)
 async def fetch_and_save_events(
     filter_: EventFilter = Depends(), db: AsyncSession = Depends(get_db)
-) -> List[Event]:
+) -> List[EventResponse]:
     """
     Fetch events from external source and save them to database.
 
@@ -147,6 +171,7 @@ async def fetch_and_save_events(
         print(f"Successfully inserted {inserted_count} events")
         await db.commit()
 
+        # Return the updated events list
         return await get_events(filter_, db)
     except Exception as e:
         print(f"Error in fetch_and_save_events: {e}")
