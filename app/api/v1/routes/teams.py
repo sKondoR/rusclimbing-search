@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.db.db import get_db
-from app.api.models import Event, TeamCache
+from app.db.models import Event, TeamCache
 from app.core.config import settings
 
 teamsRouter = APIRouter(prefix="/api", tags=["teams"])

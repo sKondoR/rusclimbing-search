@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.db.db import get_db
-from app.api.models import Event
+from app.db.models import Event
 from app.api.parser import parse_events
 from app.api.utils import parse_date_range
 from app.core.config import settings
@@ -52,14 +52,26 @@ async def get_events(
         if not event.link:
             continue
         if filter_.start or filter_.end:
-            # Parse date range and apply filters
-            start_date, end_date = parse_date_range(str(event.date), str(event.year))
+            # Фильтрация по диапазону дат
+            # Событие должно начинаться ВНУТРИ диапазона
+            if filter_.start and event.startdate:
+                if event.startdate < filter_.start:
+                    continue
             
-            # Добавляем проверки на None
-            if start_date and filter_.start and start_date < filter_.start:
-                continue
-            if end_date and filter_.end and end_date > filter_.end:
-                continue
+            # Событие должно заканчиваться ВНУТРИ диапазона
+            if filter_.end and event.enddate:
+                if event.enddate > filter_.end:
+                    continue
+            
+            # Если задан только start, показываем события, начинающиеся >= start
+            if filter_.start and not filter_.end and event.startdate:
+                if event.startdate < filter_.start:
+                    continue
+            
+            # Если задан только end, показываем события, заканчивающиеся <= end
+            if filter_.end and not filter_.start and event.enddate:
+                if event.enddate > filter_.end:
+                    continue
         
         if filter_.types and event.type not in filter_.types:
             continue
@@ -71,7 +83,18 @@ async def get_events(
         filtered_events.append(event)
     
     # Convert Event objects to EventResponse and sort by link
-    event_responses = [EventResponse.model_validate(event.__dict__) for event in filtered_events]
+    # Handle empty strings for date fields
+    event_dict_list = []
+    for event in filtered_events:
+        event_dict = event.__dict__.copy()
+        # Convert empty strings to None for date fields
+        if event_dict.get('startdate') == '':
+            event_dict['startdate'] = None
+        if event_dict.get('enddate') == '':
+            event_dict['enddate'] = None
+        event_dict_list.append(event_dict)
+    
+    event_responses = [EventResponse.model_validate(event_dict) for event_dict in event_dict_list]
     event_responses.sort(key=lambda x: x.link)
     return BaseResponse(data=event_responses, success=True)
 
@@ -162,28 +185,62 @@ async def fetch_and_save_events(
         print(message)
         print(f"Existing links: {len(existing_links)}")
 
+        # Insert events in batches to avoid transaction size limits
+        batch_size = 100
         inserted_count = 0
-        for comp in new_events:
+        
+        for i in range(0, len(new_events), batch_size):
+            batch = new_events[i:i + batch_size]
             try:
-                event = Event(
-                    date=comp["date"],
-                    year=comp["year"],
-                    link=comp["link"],
-                    name=comp["name"],
-                    location=comp["location"],
-                    type=comp["type"],
-                    groups=comp["groups"],
-                    disciplines=comp["disciplines"],
-                )
-                db.add(event)
-                inserted_count += 1
+                # Start new transaction for each batch
+                await db.begin()
+                
+                for new_event in batch:
+                    try:
+                        # Validate event data before insertion
+                        if not new_event.get("link"):
+                            print(f"Skipping event without link: {new_event.get('name', 'Unknown')}")
+                            continue
+                            
+                        if not new_event.get("date"):
+                            print(f"Skipping event without date: {new_event.get('name', 'Unknown')}")
+                            continue
+                            
+                        if not new_event.get("name"):
+                            print(f"Skipping event without name: {new_event.get('link', 'Unknown')}")
+                            continue
+                            
+                        # If HTML dates are empty, generate from date and year
+                        if new_event["date"] and new_event["year"]:
+                            start_date, end_date = parse_date_range(new_event["date"], new_event["year"])
+                        
+                        event = Event(
+                            date=new_event["date"],
+                            year=new_event["year"],
+                            startdate=start_date,
+                            enddate=end_date,
+                            link=new_event["link"],
+                            name=new_event["name"],
+                            location=new_event.get("location", ""),
+                            type=new_event.get("type", ""),
+                            groups=new_event.get("groups", []),
+                            disciplines=new_event.get("disciplines", []),
+                        )
+                        db.add(event)
+                        inserted_count += 1
+                    except Exception as e:
+                        print(f"Error inserting event with link {new_event['link']}: {e}")
+                        continue
+                
+                await db.commit()
+                print(f"Successfully inserted batch {i//batch_size + 1} with {len(batch)} events")
+                
             except Exception as e:
-                print(f"Error inserting event with link {comp['link']}: {e}")
+                print(f"Error in batch {i//batch_size + 1}: {e}")
+                await db.rollback()
                 continue
 
-        print(f"Successfully inserted {inserted_count} events")
-        await db.commit()
-        # await get_events(filter_, db)
+        print(f"Successfully inserted total {inserted_count} events")
         # Return the updated events list
         # Sort events by link
         new_events.sort(key=lambda x: x['link'])

@@ -1,6 +1,6 @@
 import re
 from app.core.config import settings
-from app.api.utils import extract_link_id, extract_year_from_link
+from app.api.utils import extract_link_id, extract_year_from_link, parse_date_range
 
 
 def parse_events(soup) -> list:
@@ -28,9 +28,21 @@ def parse_events(soup) -> list:
                     .replace("Даты проведения", "")
                     .strip()
                 )
-
             else:
                 date = ""
+
+            # Extract startdate and enddate
+            startdate_span = link.find("p", class_="table__text calendar__startdate")
+            enddate_span = link.find("p", class_="table__text calendar__enddate")
+            
+            startdate = ""
+            enddate = ""
+            
+            if startdate_span:
+                startdate = startdate_span.get_text(strip=True).strip()
+            
+            if enddate_span:
+                enddate = enddate_span.get_text(strip=True).strip()
 
             # Extract link
             href = link.get("href", "")
@@ -91,7 +103,6 @@ def parse_events(soup) -> list:
 
             # Extract year from link (format: 2112kna -> year = `20` + first 2 digits)
             year = extract_year_from_link(href)
-            print(f"DEBUG: parse_events - year extracted: {year}")
 
             events.append(
                 {
@@ -103,6 +114,8 @@ def parse_events(soup) -> list:
                     "type": type_,
                     "groups": groups,
                     "disciplines": disciplines,
+                    "startdate": startdate,
+                    "enddate": enddate,
                 }
             )
 
