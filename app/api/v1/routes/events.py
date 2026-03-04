@@ -49,6 +49,8 @@ async def get_events(
     # Apply filters to each event individually
     filtered_events = []
     for event in events:
+        if not event.link:
+            continue
         if filter_.start or filter_.end:
             # Parse date range and apply filters
             start_date, end_date = parse_date_range(str(event.date), str(event.year))
