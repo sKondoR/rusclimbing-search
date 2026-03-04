@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 import traceback
 import requests
@@ -10,6 +10,7 @@ from sqlalchemy.future import select
 from app.db.db import get_db
 from app.api.models import Event
 from app.api.parser import parse_events
+from app.api.utils import parse_date_range
 from app.core.config import settings
 # from app.core.permissions import PermissionCheck
 from app.schemas.event import BaseResponse, EventFilter, EventResponse
@@ -43,10 +44,13 @@ async def get_events(
     """
     query = select(Event)
 
-    if filter_.start:
-        query = query.where(Event.date >= filter_.start)
-    if filter_.end:
-        query = query.where(Event.date <= filter_.end)
+    if filter_.start or filter_.end:
+        # Parse date range and apply filters
+        start_date, end_date = parse_date_range(filter_.date or "", filter_.year or "")
+        if start_date:
+            query = query.where(Event.date >= start_date)
+        if end_date:
+            query = query.where(Event.date <= end_date)
     if filter_.ranks:
         # Note: ranks are not stored in the database, they are used for filtering at source
         pass

@@ -8,7 +8,13 @@ venv
 node_modules
 .ruff_cache
 .mypy_cache
+.kilocode
+.pytest_cache
 your_project_name.egg-info
 build
+.vscode
+mcp-example.json 
+mcp-usage.md
+.serena
 
 .env
