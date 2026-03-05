@@ -1,5 +1,5 @@
 [project]
-name = "your-project-name"
+name = "cfr-searching"
 version = "0.1.0"
 dependencies = [
     "fastapi==0.104.1",
