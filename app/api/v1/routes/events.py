@@ -7,8 +7,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from app.db.db import get_db
-from app.db.models import Event
+from app.core.db.session import get_session
+from app.models.event import Event
 from app.api.parser import parse_events
 from app.utils.utils import parse_date_range
 from app.core.config import settings
@@ -30,7 +30,7 @@ eventsRouter = APIRouter(prefix="/api", tags=["events"])
     dependencies=[], # Depends(PermissionCheck())
 )
 async def get_events(
-    filter_: EventFilter = Depends(), db: AsyncSession = Depends(get_db)
+    filter_: EventFilter = Depends(), db: AsyncSession = Depends(get_session)
 ) -> BaseResponse[List[EventResponse]]:
     """
     Get events from database with optional filtering.
@@ -112,7 +112,7 @@ async def get_events(
     dependencies=[],
 )
 async def fetch_and_save_events(
-    filter_: EventFilter = Depends(), db: AsyncSession = Depends(get_db)
+    filter_: EventFilter = Depends(), db: AsyncSession = Depends(get_session)
 ) -> List[EventResponse]:
     """
     Fetch events from external source and save them to database.

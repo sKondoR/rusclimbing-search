@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.permissions import PermissionCheck
-from app.db.db import startup_event
+from app.core.db.database import startup_event
 from app.api.v1.routes.events import eventsRouter
 from app.api.v1.routes.teams import teamsRouter
 from app.schemas.event import BaseResponse

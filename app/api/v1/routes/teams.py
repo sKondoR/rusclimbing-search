@@ -7,8 +7,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from app.db.db import get_db
-from app.db.models import Event, TeamCache
+from app.core.db.session import get_session
+from app.models.event import Event
+from app.models.team import TeamCache
 from app.core.config import settings
 
 teamsRouter = APIRouter(prefix="/api", tags=["teams"])
@@ -25,7 +26,7 @@ teamsRouter = APIRouter(prefix="/api", tags=["teams"])
     ),
     dependencies=[], # Depends(PermissionCheck())
 )
-async def get_teams(db: AsyncSession = Depends(get_db)):
+async def get_teams(db: AsyncSession = Depends(get_session)):
     # First, try to get teams from cache
     cache_query = select(TeamCache).where(TeamCache.year == str(settings.EVENT_YEAR))
     cache_result = await db.execute(cache_query)
