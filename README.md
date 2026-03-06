@@ -134,3 +134,4 @@ curl -X GET "http://localhost:8000/api/events/fetch?start=2024-01-01&end=2024-12
    ```
 
 python -m pytest app/api/parser_test.py -v
+curl -s "http://localhost:8000/api/events/fetch" | python -m json.tool

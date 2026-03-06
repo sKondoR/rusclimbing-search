@@ -1,12 +1,20 @@
+"""Application entry point."""
+
+import sys
+import io
+
 from fastapi import Depends, FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.permissions import PermissionCheck
 from app.core.db.database import startup_event
-from app.api.v1.routes.events import eventsRouter
-from app.api.v1.routes.teams import teamsRouter
+from app.api.v1 import events, teams
 from app.schemas.event import BaseResponse
+from app.middleware.cors import setup_cors
+
+# Force UTF-8 encoding for stdout/stderr
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -20,16 +28,21 @@ app = FastAPI(
     ],
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Setup middleware
+setup_cors(app, settings.ORIGINS)
 
-app.include_router(eventsRouter)
-app.include_router(teamsRouter)
+
+# Old CORS middleware (will be removed)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=settings.ORIGINS,
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
+
+app.include_router(events)
+app.include_router(teams)
 
 
 @app.get(

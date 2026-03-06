@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Generic, List, TypeVar
+from typing import Generic, List, TypeVar
 
 from pydantic import BaseModel
 
@@ -8,6 +8,7 @@ T = TypeVar("T")
 
 class BaseResponse(BaseModel, Generic[T]):
     """Base response model for all API endpoints."""
+
     success: bool
     data: T | None = None
     message: str | None = None

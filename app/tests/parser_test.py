@@ -1,6 +1,6 @@
 import unittest
 from bs4 import BeautifulSoup
-from app.api.parser import parse_events
+from app.utils.parsers import parse_events
 from app.utils.utils import parse_date_range
 
 
@@ -85,7 +85,7 @@ class TestParseEvents(unittest.TestCase):
         self.assertEqual(event2["type"], "С")
         self.assertEqual(event2["groups"], ["Ю", "С"])
         self.assertEqual(event2["disciplines"], ["Т", "Эт"])
-        
+
         # Test with link that doesn't contain year
         html_no_year = """
         <li class="table__item" data-accordion="element">
@@ -107,7 +107,7 @@ class TestParseEvents(unittest.TestCase):
 class TestParseDateRange(unittest.TestCase):
     """
     Unit tests for parse_date_range function.
-    
+
     Tests parsing of various date formats and ranges.
     """
 

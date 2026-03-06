@@ -15,6 +15,7 @@ class TeamCache(Base):
         created_at: Timestamp of record creation
         updated_at: Timestamp of last record update
     """
+
     __tablename__ = "team_cache"
 
     id = Column(Integer, primary_key=True, index=True)

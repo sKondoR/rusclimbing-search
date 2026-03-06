@@ -12,6 +12,7 @@ class Event(Base):
         id: Primary key
         date: Competition date (without year)
         year: Competition year (can be empty string if not found)
+        rank: Competition rank (can be empty string if not found)
         startdate: Date of competition start
         enddate: Date of competition end
         link: Unique URL link to competition details
@@ -23,11 +24,13 @@ class Event(Base):
         created_at: Timestamp of record creation
         updated_at: Timestamp of last record update
     """
+
     __tablename__ = "events"
 
     id = Column(Integer, primary_key=True, index=True)
     date = Column(String)
     year = Column(String, nullable=True)
+    rank = Column(String, nullable=True)
     startdate = Column(String)
     enddate = Column(String)
     link = Column(String, unique=True, index=True)

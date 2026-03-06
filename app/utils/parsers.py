@@ -1,6 +1,7 @@
-import re
+"""Parser utilities for extracting data from HTML."""
+
 from app.core.config import settings
-from app.utils.utils import extract_link_id, extract_year_from_link, parse_date_range
+from app.utils.utils import extract_link_id, extract_year_from_link
 
 
 def parse_events(soup) -> list:
@@ -16,9 +17,24 @@ def parse_events(soup) -> list:
     Returns:
         List of dictionaries containing parsed event information
     """
+    print("DEBUG: Starting to parse events from HTML")
+    print(f"DEBUG: Soup type: {type(soup)}")
+
     events = []
 
-    for link in soup.find_all("a", class_="table__content calendar__link"):
+    # Find all links with calendar class
+    calendar_links = soup.find_all("a", class_="table__content calendar__link")
+    print(f"DEBUG: Found {len(calendar_links)} calendar links")
+
+    if len(calendar_links) == 0:
+        print("DEBUG: No calendar links found!")
+        print(f"DEBUG: Soup type: {type(soup)}")
+        print(f"DEBUG: Soup content length: {len(str(soup))}")
+        print(f"DEBUG: Soup contains 'calendar__link': {'calendar__link' in str(soup)}")
+        print(f"DEBUG: Soup contains 'table__content': {'table__content' in str(soup)}")
+        return []
+
+    for link in calendar_links:
         try:
             # Extract date
             date_span = link.find("p", class_="table__text calendar__date")
@@ -34,13 +50,13 @@ def parse_events(soup) -> list:
             # Extract startdate and enddate
             startdate_span = link.find("p", class_="table__text calendar__startdate")
             enddate_span = link.find("p", class_="table__text calendar__enddate")
-            
+
             startdate = ""
             enddate = ""
-            
+
             if startdate_span:
                 startdate = startdate_span.get_text(strip=True).strip()
-            
+
             if enddate_span:
                 enddate = enddate_span.get_text(strip=True).strip()
 
@@ -67,7 +83,9 @@ def parse_events(soup) -> list:
             )
 
             # Filter out events with cancelled status
-            if any(rejected_word in location for rejected_word in settings.REJECTED_WORDS):
+            if any(
+                rejected_word in location for rejected_word in settings.REJECTED_WORDS
+            ):
                 continue
 
             # Extract type
@@ -101,6 +119,10 @@ def parse_events(soup) -> list:
                 )
                 disciplines = [d.strip() for d in disciplines_text.split(";")]
 
+            # Extract rank
+            rank_span = link.find("p", class_="table__text calendar__rank")
+            rank = rank_span.get_text(strip=True).strip() if rank_span else None
+
             # Extract year from link (format: 2112kna -> year = `20` + first 2 digits)
             year = extract_year_from_link(href)
 
@@ -108,6 +130,7 @@ def parse_events(soup) -> list:
                 {
                     "date": date,
                     "year": year,
+                    "rank": rank,
                     "link": link_id,
                     "name": name,
                     "location": location,
@@ -124,4 +147,3 @@ def parse_events(soup) -> list:
             continue
 
     return events
-

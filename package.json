@@ -7,9 +7,10 @@
     "start": "uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload",
     "build": "echo 'Build complete'",
     "dev": "uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload",
-    "lint:backend-ruff": "ruff check app",
-    "lint:backend-pylint": "pylint --load-plugins=pylint_fastapi_plugin app",
-    "lint": "npm run lint:backend-ruff && npm run lint:backend-pylint",
+    "link:black-fix": "black app/",
+    "lint:ruff": "ruff check --fix app",
+    "lint:pylint": "pylint --load-plugins=pylint_fastapi_plugin app",
+    "lint": "npm run lint:black-fix npm run lint:backend-ruff && npm run lint:backend-pylint",
     "format": "prettier --write \"api/**/*.py\"",
     "format:check": "prettier --check \"api/**/*.py\""
   },
