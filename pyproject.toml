@@ -15,6 +15,9 @@ dependencies = [
     "sqlalchemy==2.0.23",
     "alembic==1.13.0",
 ]
+testpaths = [
+    "app/tests"
+]
 
 [tool.uvicorn]
 app = "app.main:app"

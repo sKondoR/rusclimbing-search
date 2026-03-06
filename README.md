@@ -1,45 +1,149 @@
-# rusclimbing-search
+# CFR-search
 
-Сервис поиска результатов соревнований по скалолазанию в России.
+Сервис поиска результатов соревнований с сайта Федерации Скалолазанья России.
 
 ## Описание
 
-Этот проект представляет собой API для поиска и получения результатов соревнований по скалолазанию, проводимых в России. Данные собираются с официальных сайтов и структурируются для удобного доступа через REST-интерфейс.
+Этот проект представляет собой современное REST API для поиска и получения результатов соревнований по скалолазанию, проводимых в России. Данные собираются с официального сайта и структурируются для удобного доступа через REST-интерфейс.
+
+Проект использует современный стек:
+
+- **FastAPI** 0.104.1 - высокопроизводительный веб-фреймворк
+- **SQLAlchemy** 2.0.23 - ORM для работы с базой данных
+- **Alembic** 1.13.0 - миграции базы данных
+- **Pydantic** 2.5.0 - валидация данных
+- **asyncpg** 0.29.0 - асинхронный PostgreSQL драйвер
 
 ## Структура проекта
 
-- `api/` — основной код приложения FastAPI
-  - `main.py` — точка входа и настройка приложения
-  - `db.py` — работа с базой данных
-  - `models.py` — модели данных
-  - `parser.py` — парсер результатов соревнований
-  - `v1/` — маршруты API версии 1
-- `core/` — конфигурация приложения
-- `schemas/` — Pydantic-схемы для валидации данных
-- `services/` — бизнес-логика и сервисы
+```
+rusclimbing-search/
+├── app/
+│   ├── api/
+│   │   └── v1/
+│   │       └── endpoints/      # API эндпоинты
+│   │           ├── events.py   # Эндпоинты для соревнований
+│   │           └── teams.py    # Эндпоинты для команд
+│   ├── core/
+│   │   ├── config.py           # Конфигурация приложения
+│   │   ├── exceptions.py       # Пользовательские исключения
+│   │   ├── permissions.py      # Проверка прав доступа
+│   │   └── db/
+│   │       ├── database.py     # Настройка базы данных
+│   │       └── session.py      # Сессия базы данных
+│   ├── db/
+│   │   └── migrations/         # Alembic миграции
+│   ├── middleware/
+│   │   └── cors.py             # CORS middleware
+│   ├── models/
+│   │   ├── event.py            # Модель соревнования
+│   │   └── team.py             # Модель команды
+│   ├── repositories/
+│   │   ├── event_repository.py # Репозиторий событий
+│   │   └── team_repository.py  # Репозиторий команд
+│   ├── schemas/
+│   │   ├── event.py            # Схемы событий
+│   │   └── team.py             # Схемы команд
+│   ├── services/
+│   │   ├── event_service.py    # Сервис соревнований
+│   │   └── team_service.py     # Сервис команд
+│   ├── utils/
+│   │   ├── parsers.py          # Парсеры данных
+│   │   └── utils.py            # Утилиты
+│   ├── tests/
+│   │   ├── parser_test.py      # Тесты парсера
+│   │   └── run_tests.py        # Запуск тестов
+│   └── main.py                 # Точка входа приложения
+├── .ai-factory.json            # AI Factory конфигурация
+├── .env.example                # Пример переменных окружения
+├── .gitignore                  # Git исключения
+├── .pylintrc                   # PyLint конфигурация
+├── .python-version             # Версия Python
+├── .vercelignore               # Vercel исключения
+├── ai-request.md               # Запрос к AI Factory
+├── linting.md                  # Правила линтинга
+├── package.json                # Node.js зависимости
+├── pyproject.toml              # Python проект и зависимости
+├── README.md                   # Документация
+├── VERCEL_SETUP.md             # Настройка Vercel
+├── vercel.json                 # Vercel конфигурация
+└── ai-factory/                 # AI Factory конфигурация
+    ├── ARCHITECTURE.md         # Архитектура проекта
+    ├── RULES.md                # Правила проекта
+    └── ROADMAP.md              # Roadmap
+```
 
 ## Зависимости
 
-- Python 3.9+
-- FastAPI
-- SQLAlchemy
-- BeautifulSoup
+- **Python** 3.10+
+- **FastAPI** 0.104.1 - веб-фреймворк
+- **Uvicorn** 0.24.0 - ASGI сервер
+- **SQLAlchemy** 2.0.23 - ORM
+- **Alembic** 1.13.0 - миграции базы данных
+- **Pydantic** 2.5.0 - валидация данных
+- **Pydantic-settings** 2.1.0 - настройка конфигурации
+- **asyncpg** 0.29.0 - асинхронный PostgreSQL драйвер
+- **beautifulsoup4** 4.12.2 - парсинг HTML
+- **requests** 2.31.0 - HTTP клиент
+- **python-dotenv** 1.0.0 - загрузка .env файлов
 
 ## Установка
 
-```bash
-pip install .
-```
+1. **Клонирование репозитория:**
+
+   ```bash
+   git clone <repository-url>
+   cd rusclimbing-search
+   ```
+
+2. **Установка зависимостей:**
+
+   ```bash
+   pip install -e .
+   ```
+
+3. **Настройка переменных окружения:**
+
+   ```bash
+   cp .env.example .env
+   # Отредактируйте .env файл с вашими настройками
+   ```
+
+4. **Инициализация базы данных:**
+   ```bash
+   alembic upgrade head
+   ```
 
 ## Запуск
 
+### Локальный запуск
+
 ```bash
-uvicorn api.main:app --reload
+# Режим разработки с автоматической перезагрузкой
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
+# Или через Python
+python -m uvicorn app.main:app --reload
 ```
+
+### Производственный запуск
+
+```bash
+# Без автоматической перезагрузки
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
+```
+
+### Доступ к API
+
+- **API Documentation (Swagger UI)**: http://localhost:8000/docs
+- **API Documentation (ReDoc)**: http://localhost:8000/redoc
+- **Health Check**: http://localhost:8000/health
 
 ## API Эндпоинты
 
-### GET /api/events
+### Соревнования (Events)
+
+#### GET /api/v1/events
 
 Получение списка соревнований с фильтрацией
 
@@ -55,10 +159,20 @@ uvicorn api.main:app --reload
 **Пример запроса:**
 
 ```bash
-curl -X GET "http://localhost:8000/api/events?start=2024-01-01&end=2024-12-31&types=book_competition&groups=adults"
+curl -X GET "http://localhost:8000/api/v1/events?start=2024-01-01&end=2024-12-31&types=book_competition&groups=adults"
 ```
 
-### GET /api/events/fetch
+#### GET /api/v1/events/{event_id}
+
+Получение информации о конкретном соревновании
+
+**Пример запроса:**
+
+```bash
+curl -X GET "http://localhost:8000/api/v1/events/1"
+```
+
+#### GET /api/v1/events/fetch
 
 Загрузка и сохранение соревнований из источника
 
@@ -74,27 +188,49 @@ curl -X GET "http://localhost:8000/api/events?start=2024-01-01&end=2024-12-31&ty
 **Пример запроса:**
 
 ```bash
-curl -X GET "http://localhost:8000/api/events/fetch?start=2024-01-01&end=2024-12-31"
+curl -X GET "http://localhost:8000/api/v1/events/fetch?start=2024-01-01&end=2024-12-31"
 ```
 
-## Параметры фильтрации
+### Команды (Teams)
 
-### Ранги
+#### GET /api/v1/teams
 
-- `Всероссийские`
-- `Международные`
-- `Региональные`
+Получение списка команд
 
-### Типы
+**Пример запроса:**
+
+```bash
+curl -X GET "http://localhost:8000/api/v1/teams"
+```
+
+#### GET /api/v1/teams/{team_id}
+
+Получение информации о конкретной команде
+
+**Пример запроса:**
+
+```bash
+curl -X GET "http://localhost:8000/api/v1/teams/1"
+```
+
+## Параметры фильтрации на сайте Федерации Скалолазанья России
+
+### Ранги (Ranks)
+
+- `Всероссийские` (national)
+- `Международные` (international)
+- `Региональные` (regional)
+
+### Типы (Types)
 
 - `book_competition` - соревнования
 - `book_festival` - фестивали
 - `book_learning` - обучение
 - `book_train` - тренировки
 
-### Группы
+### Группы (Groups)
 
-- `adults` - взрослые
+- `adults` - взрослые до 2026 г.
   до 2026 г.
 - `juniors` - юниоры 18-19 лет
 - `older` - юноши, девушки 16-17 лет
@@ -107,7 +243,7 @@ curl -X GET "http://localhost:8000/api/events/fetch?start=2024-01-01&end=2024-12
 - `v17` - юноши, девушки 17-18 лет
 - `v19` - юниоры 19-20 лет
 
-### Дисциплины
+### Дисциплины (Disciplines)
 
 - `bouldering` - боулдеринг
 - `dvoerobye` - двоеборье
@@ -117,21 +253,96 @@ curl -X GET "http://localhost:8000/api/events/fetch?start=2024-01-01&end=2024-12
 - `sv` - спортивное восхождение
 - `mnogobore` - многоборье
 
+## Тестирование
+
+pytest
+
+### Линтинг
+
+pylint, ruff
+
 ## Деплой на Vercel
 
-1. Создайте аккаунт на [Vercel](https://vercel.com/)
-2. Установите Vercel CLI:
-   ```bash
-   npm i -g vercel
-   ```
-3. Залогиньтесь:
-   ```bash
-   vercel login
-   ```
-4. Деплойте проект:
-   ```bash
-   vercel --prod
-   ```
+### Необходимые шаги
 
-python -m pytest app/api/parser_test.py -v
-curl -s "http://localhost:8000/api/events/fetch" | python -m json.tool
+1. **Переменные окружения**
+
+- `DATABASE_URL` - URL подключения к базе данных PostgreSQL
+
+2. **Деплой**
+
+```bash
+# Установка Vercel CLI
+npm i -g vercel
+
+# Логин
+vercel login
+
+# Деплой
+vercel --prod
+```
+
+### Проверка работы
+
+После деплоя проверьте:
+
+- **Корневой endpoint**: `https://your-project.vercel.app/`
+- **Health check**: `https://your-project.vercel.app/health`
+- **Swagger документация**: `https://your-project.vercel.app/docs`
+
+### Структура проекта для Vercel
+
+```
+rusclimbing-search/
+├── app/
+│   ├── api/
+│   │   └── v1/
+│   │       └── endpoints/      # API маршруты
+│   ├── core/
+│   │   ├── config.py           # Конфигурация
+│   │   ├── permissions.py      # Права доступа
+│   │   └── db/
+│   │       ├── database.py     # База данных
+│   │       └── session.py      # Сессия
+│   ├── middleware/
+│   │   └── cors.py             # CORS
+│   ├── models/                 # Модели
+│   ├── repositories/           # Репозитории
+│   ├── schemas/                # Схемы
+│   ├── services/               # Сервисы
+│   ├── utils/                  # Утилиты
+│   └── main.py                 # Точка входа
+├── vercel.json                 # Vercel конфигурация
+├── pyproject.toml              # Зависимости
+└── package.json                # Node.js зависимости
+```
+
+## Конфигурация
+
+Основные настройки хранятся в [`app/core/config.py`](app/core/config.py:1):
+
+- `PROJECT_NAME` - Название проекта
+- `VERSION` - Версия API
+- `DATABASE_URL` - URL базы данных
+- `BASE_URL` - URL для парсинга
+- `LIVE_RESULTS_BASE_URL` - URL для результатов
+- `ORIGINS` - CORS origins
+
+## Разработка
+
+### Архитектура
+
+Проект использует архитектуру на основе слоёв (Layered Architecture):
+
+1. **API Layer** ([`app/api/v1/endpoints/`](app/api/v1/endpoints/)) - обработка HTTP запросов
+2. **Service Layer** ([`app/services/`](app/services/)) - бизнес-логика
+3. **Repository Layer** ([`app/repositories/`](app/repositories/)) - работа с данными
+4. **Model Layer** ([`app/models/`](app/models/)) - ORM модели
+5. **Schema Layer** ([`app/schemas/`](app/schemas/)) - Pydantic схемы
+
+## Дополнительные ресурсы
+
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [SQLAlchemy 2.0 Documentation](https://docs.sqlalchemy.org/en/20/)
+- [Alembic Documentation](https://alembic.sqlalchemy.org/)
+- [Vercel Documentation](https://vercel.com/docs)

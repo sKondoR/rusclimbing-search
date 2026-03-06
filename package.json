@@ -11,6 +11,8 @@
     "lint:ruff": "ruff check --fix app",
     "lint:pylint": "pylint --load-plugins=pylint_fastapi_plugin app",
     "lint": "npm run lint:black-fix npm run lint:backend-ruff && npm run lint:backend-pylint",
+    "test": "python -m pytest -v",
+    "test:coverage": "python -m pytest --cov=app --cov-report=term",
     "format": "prettier --write \"api/**/*.py\"",
     "format:check": "prettier --check \"api/**/*.py\""
   },
