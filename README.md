@@ -54,23 +54,6 @@ rusclimbing-search/
 │   │   ├── parser_test.py      # Тесты парсера
 │   │   └── run_tests.py        # Запуск тестов
 │   └── main.py                 # Точка входа приложения
-├── .ai-factory.json            # AI Factory конфигурация
-├── .env.example                # Пример переменных окружения
-├── .gitignore                  # Git исключения
-├── .pylintrc                   # PyLint конфигурация
-├── .python-version             # Версия Python
-├── .vercelignore               # Vercel исключения
-├── ai-request.md               # Запрос к AI Factory
-├── linting.md                  # Правила линтинга
-├── package.json                # Node.js зависимости
-├── pyproject.toml              # Python проект и зависимости
-├── README.md                   # Документация
-├── VERCEL_SETUP.md             # Настройка Vercel
-├── vercel.json                 # Vercel конфигурация
-└── ai-factory/                 # AI Factory конфигурация
-    ├── ARCHITECTURE.md         # Архитектура проекта
-    ├── RULES.md                # Правила проекта
-    └── ROADMAP.md              # Roadmap
 ```
 
 ## Зависимости
@@ -90,20 +73,17 @@ rusclimbing-search/
 ## Установка
 
 1. **Клонирование репозитория:**
-
    ```bash
    git clone <repository-url>
    cd rusclimbing-search
    ```
 
 2. **Установка зависимостей:**
-
    ```bash
    pip install -e .
    ```
 
 3. **Настройка переменных окружения:**
-
    ```bash
    cp .env.example .env
    # Отредактируйте .env файл с вашими настройками
@@ -260,73 +240,6 @@ pytest
 ### Линтинг
 
 pylint, ruff
-
-## Деплой на Vercel
-
-### Необходимые шаги
-
-1. **Переменные окружения**
-
-- `DATABASE_URL` - URL подключения к базе данных PostgreSQL
-
-2. **Деплой**
-
-```bash
-# Установка Vercel CLI
-npm i -g vercel
-
-# Логин
-vercel login
-
-# Деплой
-vercel --prod
-```
-
-### Проверка работы
-
-После деплоя проверьте:
-
-- **Корневой endpoint**: `https://your-project.vercel.app/`
-- **Health check**: `https://your-project.vercel.app/health`
-- **Swagger документация**: `https://your-project.vercel.app/docs`
-
-### Структура проекта для Vercel
-
-```
-rusclimbing-search/
-├── app/
-│   ├── api/
-│   │   └── v1/
-│   │       └── endpoints/      # API маршруты
-│   ├── core/
-│   │   ├── config.py           # Конфигурация
-│   │   ├── permissions.py      # Права доступа
-│   │   └── db/
-│   │       ├── database.py     # База данных
-│   │       └── session.py      # Сессия
-│   ├── middleware/
-│   │   └── cors.py             # CORS
-│   ├── models/                 # Модели
-│   ├── repositories/           # Репозитории
-│   ├── schemas/                # Схемы
-│   ├── services/               # Сервисы
-│   ├── utils/                  # Утилиты
-│   └── main.py                 # Точка входа
-├── vercel.json                 # Vercel конфигурация
-├── pyproject.toml              # Зависимости
-└── package.json                # Node.js зависимости
-```
-
-## Конфигурация
-
-Основные настройки хранятся в [`app/core/config.py`](app/core/config.py:1):
-
-- `PROJECT_NAME` - Название проекта
-- `VERSION` - Версия API
-- `DATABASE_URL` - URL базы данных
-- `BASE_URL` - URL для парсинга
-- `LIVE_RESULTS_BASE_URL` - URL для результатов
-- `ORIGINS` - CORS origins
 
 ## Разработка
 
