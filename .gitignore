@@ -16,5 +16,7 @@ build
 mcp-example.json 
 mcp-usage.md
 .serena
+ai-request.md
+.ai-factory.json
 
 .env
