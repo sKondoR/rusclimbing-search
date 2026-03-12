@@ -51,12 +51,21 @@ class TeamRepository:
         if existing:
             # Update existing entry
             existing.teams = teams
-            return existing
+        else:
+            # Create new entry
+            cache_entry = TeamCache(year=year, teams=teams)
+            self.db.add(cache_entry)
 
-        # Create new entry
-        cache_entry = TeamCache(year=year, teams=teams)
-        self.db.add(cache_entry)
-        return cache_entry
+        # Commit changes to database
+        await self.db.commit()
+        
+        # Refresh the cache entry to get updated data
+        if existing:
+            await self.db.refresh(existing)
+        else:
+            await self.db.refresh(cache_entry)
+        
+        return existing if existing else cache_entry
 
     async def get_all_years(self) -> List[str]:
         """

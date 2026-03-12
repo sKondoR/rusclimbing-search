@@ -17,6 +17,10 @@ class BaseResponse(BaseModel, Generic[T]):
 class TeamBase(BaseModel):
     year: str
     teams: List[str]
+    event: str | None = None
+    link: str | None = None
+    from_cache: bool = False
+    error: str | None = None
 
 
 class TeamCreate(TeamBase):

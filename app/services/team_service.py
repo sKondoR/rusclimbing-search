@@ -32,6 +32,7 @@ class TeamService:
         Finds the event 'Первенство России' with year 2025 and group 'Ю',
         then fetches and parses the live results page to extract team names.
         Returns cached data if available for the specified year.
+        Returns empty teams list if external site is unavailable.
 
         Returns:
             Dictionary containing teams, event info, and cache status
@@ -39,11 +40,9 @@ class TeamService:
         Raises:
             Exception: If there's an error during fetching or parsing
         """
-        print("HERE1")
         try:
             # First, try to get teams from cache
             cached_teams = await self.repository.get_by_year(str(settings.EVENT_YEAR))
-
             # If cache exists, return cached data
             if cached_teams:
                 return {
@@ -80,7 +79,7 @@ class TeamService:
             url = f"{settings.LIVE_RESULTS_BASE_URL}{event.link}/{settings.LIVE_RESULTS_PATH}"
 
             # Make GET request to the live results page
-            response = requests.get(url, timeout=10)
+            response = requests.get(url, timeout=30)
             response.raise_for_status()
 
             # Parse the HTML content
@@ -102,9 +101,36 @@ class TeamService:
                 "from_cache": False,
             }
 
+        except requests.exceptions.Timeout:
+            print(f"Timeout fetching live results from {settings.LIVE_RESULTS_BASE_URL}")
+            # Return empty list instead of raising exception
+            return {
+                "teams": [],
+                "event": settings.EVENT_NAME,
+                "link": str(settings.EVENT_YEAR),
+                "from_cache": False,
+                "error": "External site timeout, no teams available"
+            }
+        except requests.exceptions.ConnectionError as e:
+            print(f"Connection error fetching live results: {e}")
+            # Return empty list instead of raising exception
+            return {
+                "teams": [],
+                "event": settings.EVENT_NAME,
+                "link": str(settings.EVENT_YEAR),
+                "from_cache": False,
+                "error": "External site connection error, no teams available"
+            }
         except requests.exceptions.RequestException as e:
             print(f"Network error fetching live results: {e}")
-            raise Exception(f"Failed to fetch live results: {str(e)}")
+            # Return empty list instead of raising exception
+            return {
+                "teams": [],
+                "event": settings.EVENT_NAME,
+                "link": str(settings.EVENT_YEAR),
+                "from_cache": False,
+                "error": f"Failed to fetch live results: {str(e)}"
+            }
         except Exception as e:
             print(f"Error parsing live results: {e}")
             traceback.print_exc()
